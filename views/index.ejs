@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>TaskLogger - Painel</title>
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #1e1e2f;
+      color: #f5f5f5;
+      padding: 2rem;
+      margin: 0;
+    }
+
+    h1 {
+      color: #66fcf1;
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .panel {
+      max-width: 800px;
+      margin: auto;
+      background: #2c2f4a;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 0 12px #00000033;
+    }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      justify-content: center;
+    }
+
+    button {
+      background-color: #45a29e;
+      border: none;
+      padding: 0.7rem 1.5rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #66fcf1;
+      color: #1e1e2f;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.6rem;
+      margin-bottom: 1rem;
+      border: none;
+      border-radius: 8px;
+      background-color: #1e1e2f;
+      color: #f5f5f5;
+    }
+
+    pre {
+      background-color: #12121c;
+      padding: 1rem;
+      border-radius: 8px;
+      height: 200px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+
+    .label {
+      margin-top: 1rem;
+      margin-bottom: 0.5rem;
+      font-weight: bold;
+      color: #c5c6c7;
+    }
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <h1>TaskLogger</h1>
+
+    <div class="buttons">
+      <button onclick="emitGetTasks()">📋 getTasks</button>
+      <button onclick="emitStartWorker()">🧵 startWorker</button>
+      <button onclick="emitRunCommand()">💻 runCommand</button>
+    </div>
+
+    <div class="label">💬 Chat:</div>
+    <input id="chatInput" type="text" placeholder="Digite uma mensagem de chat" />
+    <button onclick="emitChat()">Enviar mensagem</button>
+
+    <div class="label">📄 Log:</div>
+    <pre id="logOutput">Aguardando eventos...</pre>
+  </div>
+
+  <script>
+    const socket = io();
+
+    function log(msg) {
+      const el = document.getElementById("logOutput");
+      el.textContent += `\n${msg}`;
+      el.scrollTop = el.scrollHeight;
+    }
+
+    function emitGetTasks() {
+      socket.emit("getTasks");
+      log("📤 Enviado: getTasks");
+    }
+
+    function emitStartWorker() {
+      socket.emit("startWorker", { numeroUm: 7, numeroDois: 5 });
+      log("📤 Enviado: startWorker { 7, 5 }");
+    }
+
+    function emitRunCommand() {
+      const cmd = prompt("Digite o comando a ser executado:", "echo Hello");
+      if (cmd) {
+        socket.emit("runCommand", cmd);
+        log(`📤 Enviado: runCommand "${cmd}"`);
+      }
+    }
+
+    function emitChat() {
+      const input = document.getElementById("chatInput");
+      const msg = input.value.trim();
+      if (msg) {
+        socket.emit("chat", msg);
+        log(`[Você]: ${msg}`);
+        input.value = "";
+      }
+    }
+
+    socket.on("tasksList", (tasks) => {
+      log("📋 Tarefas recebidas: " + JSON.stringify(tasks, null, 2));
+    });
+
+    socket.on("resultadoWorker", (res) => {
+      log("🧵 Resultado do worker: " + JSON.stringify(res));
+    });
+
+    socket.on("resultadoComando", (res) => {
+      log("💻 Resultado do comando: " + res);
+    });
+
+    socket.on("chat", (msg) => {
+      log(`[Outro usuário]: ${msg}`);
+    });
+  </script>
+</body>
+</html>
