@@ -18,16 +18,19 @@ Projeto desenvolvido na trilha de Node.js Intermediário do SENAI, com foco em p
 
 ```
 ot-07/
+├── node_modules/
 ├── src/
-│   ├── index.js
+│   ├── app.js
+│   ├── childRunner.js
 │   ├── logger.js
-│   ├── worker.js
-│   └── events/
-│       ├── getTasks.js
-│       ├── startWorker.js
-│       ├── runCommand.js
-│       └── chat.js
+│   ├── server.js
+│   ├── tasksApi.js
+│   └── worker.js
+├── views/
+│   └── index.ejs
 ├── ecosystem.config.js
+├── package-lock.json
+├── package.json
 └── README.md
 ```
 
